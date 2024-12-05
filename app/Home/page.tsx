@@ -4,21 +4,15 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Header from "../components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { TypographyP } from "@/components/ui/Typography/TypographyP";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Utensils, Leaf } from "lucide-react";
+import AlertDialog from "../components/AlertDialog";
 
 const HomePage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showSignUpButton, setShowSignUpButton] = useState(false);
+  const [showSignInButton, setShowSignInButton] = useState(false);
   const [selectedTab, setSelectedTab] = useState<string | null>(null);
 
   useEffect(() => {
@@ -28,6 +22,11 @@ const HomePage = () => {
   const handleOkClick = () => {
     setIsDialogOpen(false);
     setShowSignUpButton(true);
+  };
+
+  const handleAlreadyUserClick = () => {
+    setIsDialogOpen(false);
+    setShowSignInButton(true);
   };
 
   const handleTabChange = (value: string) => {
@@ -80,24 +79,12 @@ const HomePage = () => {
       `}</style>
 
       <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">
-                Welcome to Cook it Taste it!
-              </DialogTitle>
-            </DialogHeader>
-            <TypographyP className="text-muted-foreground">
-              Sign up to add your own recipes and share them with the world.
-              Join our community of food enthusiasts!
-            </TypographyP>
-            <DialogFooter>
-              <Button onClick={handleOkClick} size="lg">
-                Get Started
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <AlertDialog
+          isDialogOpen={isDialogOpen}
+          setIsDialogOpen={setIsDialogOpen}
+          onOkClick={handleOkClick}
+          onAlreadyUserClick={handleAlreadyUserClick}
+        />
 
         <div className="container mx-auto max-w-7xl px-4 py-8">
           <div className="flex items-center justify-between mb-12">
@@ -110,6 +97,15 @@ const HomePage = () => {
                   asChild
                 >
                   <Link href="/sign-up">Sign up</Link>
+                </Button>
+              )}
+              {showSignInButton && (
+                <Button
+                  className="absolute right-0 bg-secondary text-secondary-foreground hover:bg-secondary/90"
+                  size="lg"
+                  asChild
+                >
+                  <Link href="/sign-in">Sign in</Link>
                 </Button>
               )}
             </div>

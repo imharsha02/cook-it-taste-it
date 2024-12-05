@@ -23,7 +23,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Header from "../components/Header";
 import { Mail, User, Lock } from "lucide-react";
-import { hashPassword } from "@/utils/hashPassword";
 import { supabase } from "@/app/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -57,47 +56,43 @@ const SignUpPage = () => {
     setEmailError(null);
     setNameError(null);
 
+    console.log("Form Values:", values);
+
     try {
-      // Check for existing email
-      const { data: emailExists } = await supabase
-        .from("users")
-        .select("email")
-        .eq("email", values.email)
-        .single();
+      // Sign up the user using Supabase Auth
+      const { data: signUpData, error: signUpError } =
+        await supabase.auth.signUp({
+          email: values.email,
+          password: values.password,
+        });
 
-      if (emailExists) {
-        setEmailError("This email is already registered");
+      if (signUpError) {
+        console.error("Error signing up:", signUpError);
+        setEmailError(signUpError.message);
         setIsSubmitting(false);
         return;
       }
 
-      // Check for existing username
-      const { data: nameExists } = await supabase
-        .from("users")
-        .select("name")
-        .eq("name", values.name)
-        .single();
+      const { user } = signUpData;
 
-      if (nameExists) {
-        setNameError("This username is already taken");
+      if (!user) {
+        console.error("User not found after sign-up.");
         setIsSubmitting(false);
         return;
       }
 
-      // If no duplicates found, proceed with registration
-      const hashedPassword = await hashPassword(values.password);
-
+      // Insert additional user data into the users table
       const { error: insertError } = await supabase.from("users").insert([
         {
+          id: user.id, // Use the user.id from the auth response
           email: values.email,
           name: values.name,
           foodHabits: values.foodHabits,
-          password: hashedPassword,
         },
       ]);
 
       if (insertError) {
-        console.error("Error submitting form data:", insertError);
+        console.error("Error inserting user data:", insertError);
         setIsSubmitting(false);
         return;
       }
@@ -143,7 +138,9 @@ const SignUpPage = () => {
                             type="email"
                             placeholder="Email"
                             {...field}
-                            className={`pl-10 ${emailError ? 'border-red-500' : ''}`}
+                            className={`pl-10 ${
+                              emailError ? "border-red-500" : ""
+                            }`}
                           />
                         </div>
                       </FormControl>
@@ -172,7 +169,9 @@ const SignUpPage = () => {
                             type="text"
                             placeholder="Username"
                             {...field}
-                            className={`pl-10 ${nameError ? 'border-red-500' : ''}`}
+                            className={`pl-10 ${
+                              nameError ? "border-red-500" : ""
+                            }`}
                           />
                         </div>
                       </FormControl>
