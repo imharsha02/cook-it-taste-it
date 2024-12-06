@@ -30,7 +30,7 @@ import { useState } from "react";
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   name: z.string().min(1, "Name is required"),
-  foodHabits: z.enum(["vegetarian", "nonVegetarian"]),
+  food_habits: z.enum(["vegetarian", "nonVegetarian"]),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -45,7 +45,7 @@ const SignUpPage = () => {
     defaultValues: {
       email: "",
       name: "",
-      foodHabits: undefined,
+      food_habits: undefined,
       password: "",
     },
   });
@@ -59,15 +59,21 @@ const SignUpPage = () => {
     console.log("Form Values:", values);
 
     try {
-      // Sign up the user using Supabase Auth
+      // Signup authentication
       const { data: signUpData, error: signUpError } =
         await supabase.auth.signUp({
           email: values.email,
           password: values.password,
+          options: {
+            data: {
+              name: values.name,
+              food_habits: values.food_habits,
+            },
+          },
         });
 
       if (signUpError) {
-        console.error("Error signing up:", signUpError);
+        console.error("Detailed Signup Error:", signUpError);
         setEmailError(signUpError.message);
         setIsSubmitting(false);
         return;
@@ -81,18 +87,17 @@ const SignUpPage = () => {
         return;
       }
 
-      // Insert additional user data into the users table
-      const { error: insertError } = await supabase.from("users").insert([
+      // Insert user data
+      const { error: insertError } = await supabase.from("about_users").insert([
         {
-          id: user.id, // Use the user.id from the auth response
-          email: values.email,
+          user_id: user.id,
           name: values.name,
-          foodHabits: values.foodHabits,
+          food_habits: values.food_habits,
         },
       ]);
 
       if (insertError) {
-        console.error("Error inserting user data:", insertError);
+        console.error("Detailed Insert Error:", insertError);
         setIsSubmitting(false);
         return;
       }
@@ -100,7 +105,10 @@ const SignUpPage = () => {
       // Redirect to add recipe page
       router.push("/add-recipe");
     } catch (error) {
-      console.error("Error connecting to Supabase:", error);
+      console.error("Comprehensive Supabase Error:", error);
+      setIsSubmitting(false);
+    } finally {
+      // Ensure submission state is reset
       setIsSubmitting(false);
     }
   }
@@ -189,7 +197,7 @@ const SignUpPage = () => {
                 />
                 <FormField
                   control={form.control}
-                  name="foodHabits"
+                  name="food_habits"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Food Habits</FormLabel>

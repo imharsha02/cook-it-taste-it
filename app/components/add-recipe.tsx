@@ -1,5 +1,10 @@
-import React from "react";
+"use client";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { FaRegTrashAlt } from "react-icons/fa";
+import { CiCirclePlus } from "react-icons/ci";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -10,163 +15,163 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
-
-// Updated schema to handle ingredients as an array of objects
-const ingredientSchema = z.object({
-  name: z.string().min(1, "Ingredient name is required"),
-  quantity: z.string().min(1, "Quantity is required"),
-});
-
+import Header from "./Header";
 const formSchema = z.object({
-  recipe_name: z.string().min(1, "Recipe name is required"),
   image: z.string(),
-  ingredients: z
-    .array(ingredientSchema)
-    .min(1, "At least one ingredient is required"),
-  process: z.string().min(1, "Preparation process is required"),
+  recipe_name: z.string(),
+  ingredients: z.array(
+    z.object({
+      name: z.string().min(1, "Ingredient name is required"),
+      quantity: z.string().min(1, "Quantity is required"),
+    })
+  ),
+  procedure: z.string(),
 });
-
 const AddRecipe = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      recipe_name: "",
       image: "",
+      recipe_name: "",
       ingredients: [{ name: "", quantity: "" }],
-      process: "",
+      procedure: "",
     },
   });
-
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "ingredients",
   });
-
   function onSubmit(values: z.infer<typeof formSchema>) {
+    // Do something with the form values.
+    // ✅ This will be type-safe and validated.
     console.log(values);
   }
-
   return (
-    <div className="max-w-md mx-auto p-4">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <FormField
-            control={form.control}
-            name="image"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Dish image</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Image"
-                    type="file"
-                    onChange={(e) =>
-                      field.onChange(e.target.files?.[0]?.name || "")
-                    }
-                  />
-                </FormControl>
-                <FormDescription>Upload image of the dish</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="recipe_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Name of the dish"
-                    type="text"
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>Enter the name of the dish</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div>
-            <FormLabel>Ingredients</FormLabel>
-            {fields.map((field, index) => (
-              <div key={field.id} className="flex space-x-2 mb-2 items-center">
-                <FormField
-                  control={form.control}
-                  name={`ingredients.${index}.name`}
-                  render={({ field }) => (
-                    <FormItem className="flex-grow">
-                      <FormControl>
-                        <Input placeholder="Ingredient name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`ingredients.${index}.quantity`}
-                  render={({ field }) => (
-                    <FormItem className="flex-grow">
-                      <FormControl>
-                        <Input placeholder="Quantity" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {index > 0 && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => remove(index)}
-                    className="ml-2"
-                  >
-                    Remove
-                  </Button>
+    <div className="max-w-md mx-auto p-6">
+      <Header />
+      <Card className="my-10">
+        <CardHeader>
+          <CardTitle>Add new recipe</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {/* Image Input */}
+              <FormField
+                control={form.control}
+                name="image"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dish image</FormLabel>
+                    <FormControl>
+                      <Input type="file" {...field} />
+                    </FormControl>
+                    <FormDescription>Image of the dish</FormDescription>
+                    <FormMessage />
+                  </FormItem>
                 )}
+              />
+
+              {/* Recipe Name Input */}
+              <FormField
+                control={form.control}
+                name="recipe_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dish name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter dish name" {...field} />
+                    </FormControl>
+                    <FormDescription>Name of the dish</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Dynamic Ingredients Inputs */}
+              <div className="space-y-4">
+                <FormLabel>Ingredients</FormLabel>
+                {fields.map((field, index) => (
+                  <div key={field.id} className="flex items-center space-x-2">
+                    <FormField
+                      control={form.control}
+                      name={`ingredients.${index}.name`}
+                      render={({ field }) => (
+                        <FormItem className="flex-grow">
+                          <FormControl>
+                            <Input placeholder="Ingredient name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`ingredients.${index}.quantity`}
+                      render={({ field }) => (
+                        <FormItem className="flex-grow">
+                          <FormControl>
+                            <Input placeholder="Quantity" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    {/* Remove Ingredient Button */}
+                    {fields.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => remove(index)}
+                      >
+                        <FaRegTrashAlt className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+
+                {/* Add Ingredient Button */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => append({ name: "", quantity: "" })}
+                  className="w-full"
+                >
+                  <CiCirclePlus className="mr-2 h-4 w-4" /> Add Ingredient
+                </Button>
               </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => append({ name: "", quantity: "" })}
-              className="mt-2"
-            >
-              Add Ingredient
-            </Button>
-          </div>
 
-          <FormField
-            control={form.control}
-            name="process"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Preparation Process</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Preparation steps"
-                    type="text"
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Describe the preparation process
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              {/* Procedure Input */}
+              <FormField
+                control={form.control}
+                name="procedure"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Preparation Procedure</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Enter preparation steps"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Describe the cooking process
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <Button type="submit">Submit</Button>
-        </form>
-      </Form>
+              <Button type="submit" className="w-full">
+                Add Recipe
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
     </div>
   );
 };
