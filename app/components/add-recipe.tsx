@@ -2,7 +2,7 @@
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { CiCirclePlus } from "react-icons/ci";
+import { FaPlus } from "react-icons/fa6";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -52,8 +52,10 @@ const AddRecipe = () => {
     <div className="max-w-md mx-auto p-6">
       <Header />
       <Card className="my-10">
-        <CardHeader>
-          <CardTitle>Add new recipe</CardTitle>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">
+            Add new recipe
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -140,7 +142,7 @@ const AddRecipe = () => {
                   onClick={() => append({ name: "", quantity: "" })}
                   className="w-full"
                 >
-                  <CiCirclePlus className="mr-2 h-4 w-4" /> Add Ingredient
+                  <FaPlus className="mr-2 w-4 h-4" /> Add Ingredient
                 </Button>
               </div>
 
