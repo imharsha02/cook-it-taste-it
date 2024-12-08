@@ -43,7 +43,7 @@ const AddRecipe = () => {
     control: form.control,
     name: "ingredients",
   });
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log(values);
