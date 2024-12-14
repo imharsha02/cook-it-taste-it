@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import Header from "../components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +9,8 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Utensils, Leaf } from "lucide-react";
 import AlertDialog from "../components/AlertDialog";
+import { TypographyP } from "@/components/ui/Typography/TypographyP";
+import { TypographyH3 } from "@/components/ui/Typography/TypographyH3";
 
 const HomePage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -29,6 +32,15 @@ const HomePage = () => {
     setShowSignInButton(true);
   };
 
+  const handleDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      // Reset both button states when dialog is closed
+      setShowSignUpButton(false);
+      setShowSignInButton(false);
+      setIsDialogOpen(false);
+    }
+  };
+
   const handleTabChange = (value: string) => {
     setSelectedTab(value);
   };
@@ -42,11 +54,13 @@ const HomePage = () => {
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <Leaf className="h-4 w-4 text-green-600" />
-              <h3 className="text-lg font-semibold">Vegetarian Dish {item}</h3>
+              <TypographyH3 className="text-base">
+                Vegetarian Dish {item}
+              </TypographyH3>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <TypographyP className="text-sm [&:not(:first-child)]:mt-2 text-muted-foreground">
               A delicious plant-based recipe.
-            </p>
+            </TypographyP>
           </CardContent>
         </Card>
       ))}
@@ -57,13 +71,13 @@ const HomePage = () => {
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <Utensils className="h-4 w-4 text-red-600" />
-              <h3 className="text-lg font-semibold">
+              <TypographyH3 className=" text-base">
                 Non-Vegetarian Dish {item}
-              </h3>
+              </TypographyH3>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <TypographyP className="text-sm [&:not(:first-child)]:mt-2 text-muted-foreground">
               A savory meat-based recipe.
-            </p>
+            </TypographyP>
           </CardContent>
         </Card>
       ))}
@@ -81,7 +95,7 @@ const HomePage = () => {
       <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
         <AlertDialog
           isDialogOpen={isDialogOpen}
-          setIsDialogOpen={setIsDialogOpen}
+          setIsDialogOpen={handleDialogOpenChange}
           onOkClick={handleOkClick}
           onAlreadyUserClick={handleAlreadyUserClick}
         />
@@ -90,24 +104,36 @@ const HomePage = () => {
           <div className="flex items-center justify-between mb-12">
             <div className="flex-1 flex justify-center relative w-full">
               <Header />
-              {showSignUpButton && (
-                <Button
-                  className="absolute right-0 bg-primary text-primary-foreground hover:bg-primary/90"
-                  size="lg"
-                  asChild
-                >
-                  <Link href="/sign-up">Sign up</Link>
-                </Button>
-              )}
-              {showSignInButton && (
-                <Button
-                  className="absolute right-0 bg-secondary text-secondary-foreground hover:bg-secondary/90"
-                  size="lg"
-                  asChild
-                >
-                  <Link href="/sign-in">Sign in</Link>
-                </Button>
-              )}
+              <SignedIn>
+                <div className="absolute right-0 flex items-center gap-4">
+                  <UserButton />
+                  <Button
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    size="lg"
+                  >
+                    Add Recipe
+                  </Button>
+                </div>
+              </SignedIn>
+              <SignedOut>
+                <div className="absolute right-0 space-x-4">
+                  {showSignUpButton && (
+                    <Button>
+                      <Link href="/sign-up">Sign up</Link>
+                    </Button>
+                  )}
+                  {showSignInButton && (
+                    <Button>
+                      <Link href="/sign-in">Sign in</Link>
+                    </Button>
+                  )}
+                  {!showSignUpButton && !showSignInButton && (
+                    <>
+                      {/* Default buttons, which won't render in this case */}
+                    </>
+                  )}
+                </div>
+              </SignedOut>
             </div>
           </div>
 
@@ -145,13 +171,13 @@ const HomePage = () => {
                         <CardContent className="p-4">
                           <div className="flex items-center gap-2 mb-2">
                             <Leaf className="h-4 w-4 text-green-600" />
-                            <h3 className="text-lg font-semibold">
+                            <TypographyH3 className="text-base">
                               Vegetarian Dish {item}
-                            </h3>
+                            </TypographyH3>
                           </div>
-                          <p className="text-sm text-muted-foreground">
+                          <TypographyP className="text-sm [&:not(:first-child)]:mt-2 text-muted-foreground">
                             A delicious plant-based recipe.
-                          </p>
+                          </TypographyP>
                         </CardContent>
                       </Card>
                     ))}
@@ -165,13 +191,13 @@ const HomePage = () => {
                         <CardContent className="p-4">
                           <div className="flex items-center gap-2 mb-2">
                             <Utensils className="h-4 w-4 text-red-600" />
-                            <h3 className="text-lg font-semibold">
+                            <TypographyH3 className="text-base">
                               Non-Vegetarian Dish {item}
-                            </h3>
+                            </TypographyH3>
                           </div>
-                          <p className="text-sm text-muted-foreground">
+                          <TypographyP className="text-sm [&:not(:first-child)]:mt-2 text-muted-foreground">
                             A savory meat-based recipe.
-                          </p>
+                          </TypographyP>
                         </CardContent>
                       </Card>
                     ))}
