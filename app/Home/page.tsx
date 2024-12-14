@@ -93,12 +93,14 @@ const HomePage = () => {
       `}</style>
 
       <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
-        <AlertDialog
-          isDialogOpen={isDialogOpen}
-          setIsDialogOpen={handleDialogOpenChange}
-          onOkClick={handleOkClick}
-          onAlreadyUserClick={handleAlreadyUserClick}
-        />
+        <SignedOut>
+          <AlertDialog
+            isDialogOpen={isDialogOpen}
+            setIsDialogOpen={handleDialogOpenChange}
+            onOkClick={handleOkClick}
+            onAlreadyUserClick={handleAlreadyUserClick}
+          />
+        </SignedOut>
 
         <div className="container mx-auto max-w-7xl px-4 py-8">
           <div className="flex items-center justify-between mb-12">
@@ -107,11 +109,8 @@ const HomePage = () => {
               <SignedIn>
                 <div className="absolute right-0 flex items-center gap-4">
                   <UserButton />
-                  <Button
-                    className="bg-primary text-primary-foreground hover:bg-primary/90"
-                    size="lg"
-                  >
-                    Add Recipe
+                  <Button className="hover:bg-primary/90" size="lg" asChild>
+                    <Link href="/add-recipe">Add Recipe</Link>
                   </Button>
                 </div>
               </SignedIn>
