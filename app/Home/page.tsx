@@ -104,13 +104,16 @@ const HomePage = () => {
 
         <div className="container mx-auto max-w-7xl px-4 py-8">
           <div className="flex items-center justify-between mb-12">
-            <div className="flex-1 flex justify-center relative w-full">
+            <div className="flex-1 flex justify-center items-center relative w-full">
               <Header />
               <SignedIn>
                 <div className="absolute right-0 flex items-center gap-4">
                   <UserButton />
                   <Button className="hover:bg-primary/90" size="lg" asChild>
                     <Link href="/add-recipe">Add Recipe</Link>
+                  </Button>
+                  <Button className="hover:bg-primary/90" size="lg" asChild>
+                    <Link href="/my-recipes">My Recipes</Link>
                   </Button>
                 </div>
               </SignedIn>
