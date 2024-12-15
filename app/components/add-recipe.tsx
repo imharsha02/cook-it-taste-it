@@ -1,8 +1,11 @@
 "use client";
 import { z } from "zod";
+import { useState } from "react";
+import { supabase } from "@/app/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa6";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -18,9 +21,11 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import Header from "./Header";
+
 const formSchema = z.object({
-  image: z.string(),
   recipe_name: z.string(),
+  food_type: z.enum(["vegetarian", "nonVegetarian"]),
+  image: z.string(),
   ingredients: z.array(
     z.object({
       name: z.string().min(1, "Ingredient name is required"),
@@ -29,11 +34,15 @@ const formSchema = z.object({
   ),
   procedure: z.string(),
 });
+
 const AddRecipe = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       image: "",
+      food_type: undefined,
       recipe_name: "",
       ingredients: [{ name: "", quantity: "" }],
       procedure: "",
@@ -43,11 +52,31 @@ const AddRecipe = () => {
     control: form.control,
     name: "ingredients",
   });
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const { error: insertError } = await supabase.from("recipes").insert([
+        {
+          recipe_name: values.recipe_name,
+          food_type: values.food_type,
+          image: values.image,
+          ingredients: values.ingredients,
+          procedure: values.procedure,
+        },
+      ]);
+      if (insertError) {
+        console.error("Error submitting form data:", insertError);
+        setIsSubmitting(false);
+        return;
+      }
+    } catch (error) {
+      console.error("Error connecting to Supabase:", error);
+      setIsSubmitting(false);
+    }
   }
+
   return (
     <div className="max-w-md mx-auto p-6">
       <Header />
@@ -87,6 +116,44 @@ const AddRecipe = () => {
                       <Input placeholder="Enter dish name" {...field} />
                     </FormControl>
                     <FormDescription>Name of the dish</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="food_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Type of food</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        className="flex space-x-4"
+                      >
+                        <FormItem className="flex items-center space-x-2">
+                          <FormControl>
+                            <RadioGroupItem value="vegetarian" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Vegetarian
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-2">
+                          <FormControl>
+                            <RadioGroupItem value="nonVegetarian" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Non-vegetarian
+                          </FormLabel>
+                        </FormItem>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormDescription>
+                      Select your dietary preference
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
