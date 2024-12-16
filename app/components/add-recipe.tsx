@@ -3,6 +3,7 @@ import { z } from "zod";
 import { useState } from "react";
 import { supabase } from "@/app/lib/supabase";
 import { Button } from "@/components/ui/button";
+import { useUser } from "@clerk/nextjs";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa6";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -36,6 +37,7 @@ const formSchema = z.object({
 });
 
 const AddRecipe = () => {
+  const { user } = useUser();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -54,11 +56,14 @@ const AddRecipe = () => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
+    if (isSubmitting) return; // Prevent duplicate submissions
+    setIsSubmitting(true); // Set submitting state to true at the start
+
     try {
+      // Attempt to insert data into Supabase
       const { error: insertError } = await supabase.from("recipes").insert([
         {
+          user_id: user?.id, // Ensure Clerk provides a valid user ID
           recipe_name: values.recipe_name,
           food_type: values.food_type,
           image: values.image,
@@ -66,13 +71,17 @@ const AddRecipe = () => {
           procedure: values.procedure,
         },
       ]);
+
       if (insertError) {
         console.error("Error submitting form data:", insertError);
-        setIsSubmitting(false);
         return;
       }
+
+      console.log("Recipe added successfully!");
     } catch (error) {
       console.error("Error connecting to Supabase:", error);
+    } finally {
+      // Ensure `isSubmitting` is reset to false in all cases
       setIsSubmitting(false);
     }
   }
@@ -234,8 +243,8 @@ const AddRecipe = () => {
                 )}
               />
 
-              <Button type="submit" className="w-full">
-                Add Recipe
+              <Button disabled={isSubmitting} type="submit" className="w-full">
+                {isSubmitting ? "Adding recipe..." : "Add Recipe"}
               </Button>
             </form>
           </Form>
