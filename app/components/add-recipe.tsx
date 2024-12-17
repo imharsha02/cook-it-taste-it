@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import Header from "./Header";
+import { useRouter } from "next/router";
 
 const formSchema = z.object({
   recipe_name: z.string(),
@@ -37,6 +38,7 @@ const formSchema = z.object({
 });
 
 const AddRecipe = () => {
+  const router = useRouter();
   const { user } = useUser();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -83,6 +85,7 @@ const AddRecipe = () => {
     } finally {
       // Ensure `isSubmitting` is reset to false in all cases
       setIsSubmitting(false);
+      router.push("/Home");
     }
   }
 
