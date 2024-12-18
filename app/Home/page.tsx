@@ -1,6 +1,6 @@
-"use client"
+"use client";
 import { useState, useEffect } from "react";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import Header from "../components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,11 +12,15 @@ import { TypographyP } from "@/components/ui/Typography/TypographyP";
 import { TypographyH3 } from "@/components/ui/Typography/TypographyH3";
 import { supabase } from "../lib/supabase";
 
+interface Ingredient {
+  name: string;
+  quantity: string;
+}
 interface Recipe {
   id: number;
   food_type: string;
   image: string;
-  ingredients: object[];
+  ingredients: Ingredient[];
   procedure: string;
   recipe_name: string;
   user_id: string;
@@ -100,9 +104,18 @@ const HomePage = () => {
             {recipe.recipe_name}
           </TypographyH3>
         </div>
-        <TypographyP className="text-sm [&:not(:first-child)]:mt-2 text-muted-foreground">
-          {JSON.stringify(recipe.ingredients)}
-        </TypographyP>
+        <div className="text-sm text-muted-foreground">
+          <ul className="list-disc pl-5">
+            {recipe.ingredients.map(
+              (ingredient: { name: string; quantity: string }, index) => (
+                <li key={index}>
+                  {ingredient.quantity} <strong>{ingredient.name}</strong>
+                </li>
+              )
+            )}
+          </ul>
+        </div>
+
         <TypographyP className="text-sm [&:not(:first-child)]:mt-2 text-muted-foreground">
           {recipe.procedure}
         </TypographyP>
@@ -149,12 +162,21 @@ const HomePage = () => {
     );
   };
 
-  const renderAllCards = () => (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {renderRecipes(true)}
-      {renderRecipes(false)}
-    </div>
-  );
+  const renderAllCards = () => {
+    const hasNonVeg = recipes.some(
+      (recipe) => recipe.food_type === "non-vegetarian"
+    );
+
+    return (
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {renderRecipes(true)} {/* Always display vegetarian cards */}
+        {!hasNonVeg && renderRecipes(true)}{" "}
+        {/* Fill space with veg cards if no non-veg */}
+        {hasNonVeg && renderRecipes(false)}{" "}
+        {/* Display non-veg cards only if they exist */}
+      </div>
+    );
+  };
 
   return (
     <>
