@@ -1,5 +1,4 @@
-"use client";
-
+"use client"
 import { useState, useEffect } from "react";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
@@ -11,15 +10,54 @@ import { Utensils, Leaf } from "lucide-react";
 import AlertDialog from "../components/AlertDialog";
 import { TypographyP } from "@/components/ui/Typography/TypographyP";
 import { TypographyH3 } from "@/components/ui/Typography/TypographyH3";
+import { supabase } from "../lib/supabase";
+
+interface Recipe {
+  id: number;
+  food_type: string;
+  image: string;
+  ingredients: object[];
+  procedure: string;
+  recipe_name: string;
+  user_id: string;
+}
 
 const HomePage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showSignUpButton, setShowSignUpButton] = useState(false);
   const [showSignInButton, setShowSignInButton] = useState(false);
   const [selectedTab, setSelectedTab] = useState<string | null>(null);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsDialogOpen(true);
+  }, []);
+
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from("recipes")
+          .select("*")
+          .order("id", { ascending: false });
+
+        if (error) {
+          throw error;
+        }
+
+        setRecipes(data || []);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching recipes:", err);
+        setError("Failed to load recipes");
+        setLoading(false);
+      }
+    };
+
+    fetchRecipes();
   }, []);
 
   const handleOkClick = () => {
@@ -34,7 +72,6 @@ const HomePage = () => {
 
   const handleDialogOpenChange = (open: boolean) => {
     if (!open) {
-      // Reset both button states when dialog is closed
       setShowSignUpButton(false);
       setShowSignInButton(false);
       setIsDialogOpen(false);
@@ -45,42 +82,77 @@ const HomePage = () => {
     setSelectedTab(value);
   };
 
+  const renderRecipeCard = (recipe: Recipe) => (
+    <Card key={recipe.id} className="overflow-hidden">
+      <img
+        src={recipe.image}
+        alt={recipe.recipe_name}
+        className="w-full aspect-video object-cover"
+      />
+      <CardContent className="p-4">
+        <div className="flex items-center gap-2 mb-2">
+          {recipe.food_type === "vegetarian" ? (
+            <Leaf className="h-4 w-4 text-green-600" />
+          ) : (
+            <Utensils className="h-4 w-4 text-red-600" />
+          )}
+          <TypographyH3 className="text-base">
+            {recipe.recipe_name}
+          </TypographyH3>
+        </div>
+        <TypographyP className="text-sm [&:not(:first-child)]:mt-2 text-muted-foreground">
+          {JSON.stringify(recipe.ingredients)}
+        </TypographyP>
+        <TypographyP className="text-sm [&:not(:first-child)]:mt-2 text-muted-foreground">
+          {recipe.procedure}
+        </TypographyP>
+      </CardContent>
+    </Card>
+  );
+
+  const renderRecipes = (isVegetarian: boolean) => {
+    const filteredRecipes = recipes.filter(
+      (recipe) =>
+        recipe.food_type === (isVegetarian ? "vegetarian" : "non-vegetarian")
+    );
+
+    if (loading) {
+      return (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((item) => (
+            <div key={item} className="animate-pulse">
+              <div className="aspect-video bg-gray-300 mb-4" />
+              <div className="h-4 bg-gray-300 mb-2 w-3/4" />
+              <div className="h-4 bg-gray-300 w-1/2" />
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (error) {
+      return <div className="text-red-500 text-center py-8">{error}</div>;
+    }
+
+    if (filteredRecipes.length === 0) {
+      return (
+        <div className="text-center text-muted-foreground py-8">
+          No {isVegetarian ? "vegetarian" : "non-vegetarian"} recipes found.
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {filteredRecipes.map(renderRecipeCard)}
+      </div>
+    );
+  };
+
   const renderAllCards = () => (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {/* Vegetarian Cards */}
-      {[1, 2, 3, 4, 5, 6].map((item) => (
-        <Card key={`veg-${item}`} className="overflow-hidden">
-          <div className="aspect-video bg-muted" />
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Leaf className="h-4 w-4 text-green-600" />
-              <TypographyH3 className="text-base">
-                Vegetarian Dish {item}
-              </TypographyH3>
-            </div>
-            <TypographyP className="text-sm [&:not(:first-child)]:mt-2 text-muted-foreground">
-              A delicious plant-based recipe.
-            </TypographyP>
-          </CardContent>
-        </Card>
-      ))}
-      {/* Non-Vegetarian Cards */}
-      {[1, 2, 3, 4, 5, 6].map((item) => (
-        <Card key={`non-veg-${item}`} className="overflow-hidden">
-          <div className="aspect-video bg-muted" />
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Utensils className="h-4 w-4 text-red-600" />
-              <TypographyH3 className=" text-base">
-                Non-Vegetarian Dish {item}
-              </TypographyH3>
-            </div>
-            <TypographyP className="text-sm [&:not(:first-child)]:mt-2 text-muted-foreground">
-              A savory meat-based recipe.
-            </TypographyP>
-          </CardContent>
-        </Card>
-      ))}
+      {renderRecipes(true)}
+      {renderRecipes(false)}
     </div>
   );
 
@@ -166,44 +238,10 @@ const HomePage = () => {
                 {!selectedTab && <div className="mt-4">{renderAllCards()}</div>}
 
                 <TabsContent value="veg" className="mt-4">
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {[1, 2, 3, 4, 5, 6].map((item) => (
-                      <Card key={item} className="overflow-hidden">
-                        <div className="aspect-video bg-muted" />
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Leaf className="h-4 w-4 text-green-600" />
-                            <TypographyH3 className="text-base">
-                              Vegetarian Dish {item}
-                            </TypographyH3>
-                          </div>
-                          <TypographyP className="text-sm [&:not(:first-child)]:mt-2 text-muted-foreground">
-                            A delicious plant-based recipe.
-                          </TypographyP>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                  {renderRecipes(true)}
                 </TabsContent>
                 <TabsContent value="non-veg" className="mt-4">
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {[1, 2, 3, 4, 5, 6].map((item) => (
-                      <Card key={item} className="overflow-hidden">
-                        <div className="aspect-video bg-muted" />
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Utensils className="h-4 w-4 text-red-600" />
-                            <TypographyH3 className="text-base">
-                              Non-Vegetarian Dish {item}
-                            </TypographyH3>
-                          </div>
-                          <TypographyP className="text-sm [&:not(:first-child)]:mt-2 text-muted-foreground">
-                            A savory meat-based recipe.
-                          </TypographyP>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                  {renderRecipes(false)}
                 </TabsContent>
               </Tabs>
             </CardContent>
