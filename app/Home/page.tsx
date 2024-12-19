@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import Header from "../components/Header";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Utensils, Leaf } from "lucide-react";
@@ -123,12 +123,14 @@ const HomePage = () => {
     </Card>
   );
 
-  const renderRecipes = (isVegetarian: boolean) => {
-    const filteredRecipes = recipes.filter(
-      (recipe) =>
-        recipe.food_type === (isVegetarian ? "vegetarian" : "non-vegetarian")
-    );
+  const getFilteredRecipes = (type: string | null) => {
+    if (!type) {
+      return recipes; // Return all recipes when no tab is selected
+    }
+    return recipes.filter((recipe) => recipe.food_type === type);
+  };
 
+  const renderRecipeGrid = (filteredRecipes: Recipe[]) => {
     if (loading) {
       return (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -150,7 +152,7 @@ const HomePage = () => {
     if (filteredRecipes.length === 0) {
       return (
         <div className="text-center text-muted-foreground py-8">
-          No {isVegetarian ? "vegetarian" : "non-vegetarian"} recipes found.
+          No recipes found.
         </div>
       );
     }
@@ -158,22 +160,6 @@ const HomePage = () => {
     return (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredRecipes.map(renderRecipeCard)}
-      </div>
-    );
-  };
-
-  const renderAllCards = () => {
-    const hasNonVeg = recipes.some(
-      (recipe) => recipe.food_type === "non-vegetarian"
-    );
-
-    return (
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {renderRecipes(true)} {/* Always display vegetarian cards */}
-        {!hasNonVeg && renderRecipes(true)}{" "}
-        {/* Fill space with veg cards if no non-veg */}
-        {hasNonVeg && renderRecipes(false)}{" "}
-        {/* Display non-veg cards only if they exist */}
       </div>
     );
   };
@@ -236,20 +222,20 @@ const HomePage = () => {
           <Card className="bg-card/50 backdrop-blur-sm shadow-lg">
             <CardContent className="p-6">
               <Tabs
-                value={selectedTab || ""}
+                value={selectedTab || undefined}
                 onValueChange={handleTabChange}
                 className="w-full mx-auto"
               >
                 <TabsList className="grid w-full grid-cols-2 mb-8 bg-gray-100 p-1 rounded-lg">
                   <TabsTrigger
-                    value="veg"
+                    value="vegetarian"
                     className="text-lg py-3 rounded-md transition-all data-[state=active]:bg-gray-300 data-[state=active]:text-gray-900 data-[state=active]:shadow-md"
                   >
                     <Leaf className="mr-2 h-5 w-5" />
                     Vegetarian
                   </TabsTrigger>
                   <TabsTrigger
-                    value="non-veg"
+                    value="nonVegetarian"
                     className="text-lg py-3 rounded-md transition-all data-[state=active]:bg-gray-300 data-[state=active]:text-gray-900 data-[state=active]:shadow-md"
                   >
                     <Utensils className="mr-2 h-5 w-5" />
@@ -257,14 +243,9 @@ const HomePage = () => {
                   </TabsTrigger>
                 </TabsList>
 
-                {!selectedTab && <div className="mt-4">{renderAllCards()}</div>}
-
-                <TabsContent value="veg" className="mt-4">
-                  {renderRecipes(true)}
-                </TabsContent>
-                <TabsContent value="non-veg" className="mt-4">
-                  {renderRecipes(false)}
-                </TabsContent>
+                <div className="mt-4">
+                  {renderRecipeGrid(getFilteredRecipes(selectedTab))}
+                </div>
               </Tabs>
             </CardContent>
           </Card>
