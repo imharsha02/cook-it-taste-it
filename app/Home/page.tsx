@@ -8,7 +8,6 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Utensils, Leaf } from "lucide-react";
 import AlertDialog from "../components/AlertDialog";
-import { TypographyP } from "@/components/ui/Typography/TypographyP";
 import { TypographyH3 } from "@/components/ui/Typography/TypographyH3";
 import { supabase } from "../lib/supabase";
 
@@ -88,11 +87,11 @@ const HomePage = () => {
 
   const renderRecipeCard = (recipe: Recipe) => (
     <Card key={recipe.id} className="overflow-hidden">
-      <img
+      {/* <img
         src={recipe.image}
         alt={recipe.recipe_name}
         className="w-full aspect-video object-cover"
-      />
+      /> */}
       <CardContent className="p-4">
         <div className="flex items-center gap-2 mb-2">
           {recipe.food_type === "vegetarian" ? (
