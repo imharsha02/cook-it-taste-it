@@ -17,7 +17,7 @@ interface Recipe {
   recipe_name: string;
   food_type: string;
   ingredients: Ingredient[]; // JSON array
-  procedure: string;
+  procedure: { step: string }[]; // Array of steps
   image: string;
   user_id: string;
 }
@@ -85,9 +85,14 @@ const Page = () => {
                     </li>
                   ))}
                 </ul>
-                <p className="mt-2">
-                  <strong>Procedure:</strong> {recipe.procedure}
-                </p>
+                <div className="mt-4">
+                  <strong>Procedure:</strong>
+                  <ol className="list-decimal pl-6 mt-2 space-y-1">
+                    {recipe.procedure.map((stepObj, idx) => (
+                      <li key={idx}>{stepObj.step}</li>
+                    ))}
+                  </ol>
+                </div>
               </CardContent>
             </Card>
           ))}

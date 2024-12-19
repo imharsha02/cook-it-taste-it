@@ -24,6 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import Header from "./Header";
 
+// Schema definition
 const formSchema = z.object({
   recipe_name: z.string(),
   food_type: z.enum(["vegetarian", "nonVegetarian"]),
@@ -34,11 +35,15 @@ const formSchema = z.object({
       quantity: z.string().min(1, "Quantity is required"),
     })
   ),
-  procedure: z.string(),
+  procedure: z.array(
+    z.object({
+      step: z.string().min(1, "Step description is required"),
+    })
+  ),
 });
 
 const AddRecipe = () => {
-  const router = useRouter(); // Add this near the top of the component
+  const router = useRouter();
   const { user } = useUser();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -49,12 +54,26 @@ const AddRecipe = () => {
       food_type: undefined,
       recipe_name: "",
       ingredients: [{ name: "", quantity: "" }],
-      procedure: "",
+      procedure: [{ step: "" }],
     },
   });
-  const { fields, append, remove } = useFieldArray({
+
+  const {
+    fields: ingredientFields,
+    append: appendIngredient,
+    remove: removeIngredient,
+  } = useFieldArray({
     control: form.control,
     name: "ingredients",
+  });
+
+  const {
+    fields: procedureFields,
+    append: appendProcedure,
+    remove: removeProcedure,
+  } = useFieldArray({
+    control: form.control,
+    name: "procedure",
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -79,7 +98,7 @@ const AddRecipe = () => {
       }
 
       console.log("Recipe added successfully!");
-      router.push("/"); // Add this line to redirect to home page
+      router.push("/");
     } catch (error) {
       console.error("Error connecting to Supabase:", error);
     } finally {
@@ -131,6 +150,7 @@ const AddRecipe = () => {
                 )}
               />
 
+              {/* Food Type Radio Buttons */}
               <FormField
                 control={form.control}
                 name="food_type"
@@ -172,7 +192,7 @@ const AddRecipe = () => {
               {/* Dynamic Ingredients Inputs */}
               <div className="space-y-4">
                 <FormLabel>Ingredients</FormLabel>
-                {fields.map((field, index) => (
+                {ingredientFields.map((field, index) => (
                   <div key={field.id} className="flex items-center space-x-2">
                     <FormField
                       control={form.control}
@@ -199,50 +219,72 @@ const AddRecipe = () => {
                       )}
                     />
                     {/* Remove Ingredient Button */}
-                    {fields.length > 1 && (
+                    {ingredientFields.length > 1 && (
                       <Button
                         type="button"
                         variant="destructive"
                         size="icon"
-                        onClick={() => remove(index)}
+                        onClick={() => removeIngredient(index)}
                       >
                         <FaRegTrashAlt className="h-4 w-4" />
                       </Button>
                     )}
                   </div>
                 ))}
-
                 {/* Add Ingredient Button */}
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => append({ name: "", quantity: "" })}
+                  onClick={() => appendIngredient({ name: "", quantity: "" })}
                   className="w-full"
                 >
                   <FaPlus className="mr-2 w-4 h-4" /> Add Ingredient
                 </Button>
               </div>
 
-              {/* Procedure Input */}
-              <FormField
-                control={form.control}
-                name="procedure"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Preparation Procedure</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter preparation steps"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Describe the cooking process
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Dynamic Procedure Steps */}
+              <div className="space-y-4">
+                <FormLabel>Procedure</FormLabel>
+                {procedureFields.map((field, index) => (
+                  <div key={field.id} className="flex items-center space-x-2">
+                    <FormField
+                      control={form.control}
+                      name={`procedure.${index}.step`}
+                      render={({ field }) => (
+                        <FormItem className="flex-grow">
+                          <FormControl>
+                            <Textarea
+                              placeholder="Step description"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    {/* Remove Step Button */}
+                    {procedureFields.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => removeProcedure(index)}
+                      >
+                        <FaRegTrashAlt className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                {/* Add Step Button */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => appendProcedure({ step: "" })}
+                  className="w-full"
+                >
+                  <FaPlus className="mr-2 w-4 h-4" /> Add Step
+                </Button>
+              </div>
 
               <Button disabled={isSubmitting} type="submit" className="w-full">
                 {isSubmitting ? "Adding recipe..." : "Add Recipe"}

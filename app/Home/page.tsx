@@ -106,19 +106,24 @@ const HomePage = () => {
         </div>
         <div className="text-sm text-muted-foreground">
           <ul className="list-disc pl-5">
-            {recipe.ingredients.map(
-              (ingredient: { name: string; quantity: string }, index) => (
-                <li key={index}>
-                  {ingredient.quantity} <strong>{ingredient.name}</strong>
-                </li>
-              )
-            )}
+            {recipe.ingredients.map((ingredient, index) => (
+              <li key={index}>
+                {ingredient.quantity} <strong>{ingredient.name}</strong>
+              </li>
+            ))}
           </ul>
         </div>
-
-        <TypographyP className="text-sm [&:not(:first-child)]:mt-2 text-muted-foreground">
-          {recipe.procedure}
-        </TypographyP>
+        <div className="mt-4">
+          <TypographyH3 className="mb-2">Procedure:</TypographyH3>
+          <ol className="list-decimal pl-5 space-y-1 text-sm text-muted-foreground">
+            {Array.isArray(recipe.procedure) &&
+              recipe.procedure.map(
+                (stepObj: { step: string }, index: number) => (
+                  <li key={index}>{stepObj.step}</li>
+                )
+              )}
+          </ol>
+        </div>
       </CardContent>
     </Card>
   );
