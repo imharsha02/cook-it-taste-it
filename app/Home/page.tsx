@@ -105,6 +105,7 @@ const HomePage = () => {
           </TypographyH3>
         </div>
         <div className="text-sm text-muted-foreground">
+        <TypographyH3 className="mb-2">Ingredients:</TypographyH3>
           <ul className="list-disc pl-5">
             {recipe.ingredients.map((ingredient, index) => (
               <li key={index}>
