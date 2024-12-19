@@ -1,6 +1,7 @@
 "use client";
 import { z } from "zod";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@clerk/nextjs";
@@ -37,6 +38,7 @@ const formSchema = z.object({
 });
 
 const AddRecipe = () => {
+  const router = useRouter(); // Add this near the top of the component
   const { user } = useUser();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -56,14 +58,13 @@ const AddRecipe = () => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (isSubmitting) return; // Prevent duplicate submissions
-    setIsSubmitting(true); // Set submitting state to true at the start
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     try {
-      // Attempt to insert data into Supabase
       const { error: insertError } = await supabase.from("recipes").insert([
         {
-          user_id: user?.id, // Ensure Clerk provides a valid user ID
+          user_id: user?.id,
           recipe_name: values.recipe_name,
           food_type: values.food_type,
           image: values.image,
@@ -78,10 +79,10 @@ const AddRecipe = () => {
       }
 
       console.log("Recipe added successfully!");
+      router.push("/"); // Add this line to redirect to home page
     } catch (error) {
       console.error("Error connecting to Supabase:", error);
     } finally {
-      // Ensure `isSubmitting` is reset to false in all cases
       setIsSubmitting(false);
     }
   }
