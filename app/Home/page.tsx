@@ -7,7 +7,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Utensils, Leaf } from "lucide-react";
-import AlertDialog from "../components/AlertDialog";
 import { TypographyH3 } from "@/components/ui/Typography/TypographyH3";
 import { supabase } from "../lib/supabase";
 
@@ -26,17 +25,10 @@ interface Recipe {
 }
 
 const HomePage = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [showSignUpButton, setShowSignUpButton] = useState(false);
-  const [showSignInButton, setShowSignInButton] = useState(false);
   const [selectedTab, setSelectedTab] = useState<string | null>(null);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setIsDialogOpen(true);
-  }, []);
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -63,24 +55,6 @@ const HomePage = () => {
     fetchRecipes();
   }, []);
 
-  const handleOkClick = () => {
-    setIsDialogOpen(false);
-    setShowSignUpButton(true);
-  };
-
-  const handleAlreadyUserClick = () => {
-    setIsDialogOpen(false);
-    setShowSignInButton(true);
-  };
-
-  const handleDialogOpenChange = (open: boolean) => {
-    if (!open) {
-      setShowSignUpButton(false);
-      setShowSignInButton(false);
-      setIsDialogOpen(false);
-    }
-  };
-
   const handleTabChange = (value: string) => {
     setSelectedTab(value);
   };
@@ -104,7 +78,7 @@ const HomePage = () => {
           </TypographyH3>
         </div>
         <div className="text-sm text-muted-foreground">
-        <TypographyH3 className="mb-2">Ingredients:</TypographyH3>
+          <TypographyH3 className="mb-2">Ingredients:</TypographyH3>
           <ul className="list-disc pl-5">
             {recipe.ingredients.map((ingredient, index) => (
               <li key={index}>
@@ -178,15 +152,6 @@ const HomePage = () => {
       `}</style>
 
       <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
-        <SignedOut>
-          <AlertDialog
-            isDialogOpen={isDialogOpen}
-            setIsDialogOpen={handleDialogOpenChange}
-            onOkClick={handleOkClick}
-            onAlreadyUserClick={handleAlreadyUserClick}
-          />
-        </SignedOut>
-
         <div className="container mx-auto max-w-7xl px-4 py-8">
           <div className="flex items-center justify-between mb-12">
             <div className="flex-1 flex justify-center items-center relative w-full">
@@ -204,21 +169,13 @@ const HomePage = () => {
               </SignedIn>
               <SignedOut>
                 <div className="absolute right-0 space-x-4">
-                  {showSignUpButton && (
-                    <Button>
-                      <Link href="/sign-up">Sign up</Link>
-                    </Button>
-                  )}
-                  {showSignInButton && (
-                    <Button>
-                      <Link href="/sign-in">Sign in</Link>
-                    </Button>
-                  )}
-                  {!showSignUpButton && !showSignInButton && (
-                    <>
-                      {/* Default buttons, which won't render in this case */}
-                    </>
-                  )}
+                  <Button>
+                    <Link href="/sign-up">Sign up</Link>
+                  </Button>
+
+                  <Button>
+                    <Link href="/sign-in">Sign in</Link>
+                  </Button>
                 </div>
               </SignedOut>
             </div>
