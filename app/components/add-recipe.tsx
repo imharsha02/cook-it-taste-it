@@ -8,7 +8,6 @@ import { useUser } from "@clerk/nextjs";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa6";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
@@ -140,7 +139,7 @@ const AddRecipe = () => {
                 name="recipe_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Dish name</FormLabel>
+                    <FormLabel>Dish name*</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter dish name" {...field} />
                     </FormControl>
@@ -156,7 +155,7 @@ const AddRecipe = () => {
                 name="food_type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Type of food</FormLabel>
+                    <FormLabel>Type of food*</FormLabel>
                     <FormControl>
                       <RadioGroup
                         onValueChange={field.onChange}
@@ -191,7 +190,7 @@ const AddRecipe = () => {
 
               {/* Dynamic Ingredients Inputs */}
               <div className="space-y-4">
-                <FormLabel>Ingredients</FormLabel>
+                <FormLabel>Ingredients*</FormLabel>
                 {ingredientFields.map((field, index) => (
                   <div key={field.id} className="flex items-center space-x-2">
                     <FormField
@@ -244,7 +243,7 @@ const AddRecipe = () => {
 
               {/* Dynamic Procedure Steps */}
               <div className="space-y-4">
-                <FormLabel>Procedure</FormLabel>
+                <FormLabel>Procedure*</FormLabel>
                 {procedureFields.map((field, index) => (
                   <div key={field.id} className="flex items-center space-x-2">
                     <FormField
@@ -253,7 +252,7 @@ const AddRecipe = () => {
                       render={({ field }) => (
                         <FormItem className="flex-grow">
                           <FormControl>
-                            <Textarea
+                            <Input
                               placeholder="Step description"
                               {...field}
                             />
