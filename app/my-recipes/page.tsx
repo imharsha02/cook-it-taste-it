@@ -6,7 +6,10 @@ import { useUser } from "@clerk/nextjs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FaArrowLeft, FaUtensils } from "react-icons/fa6";
+import { Leaf } from "lucide-react";
 import Link from "next/link";
+import { TypographyH2 } from "@/components/ui/Typography/TypographyH2";
+import { TypographyP } from "@/components/ui/Typography/TypographyP";
 
 interface Ingredient {
   name: string;
@@ -55,26 +58,19 @@ const Page = () => {
   }, [user, isLoaded]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
-          <Button
-            asChild
-            variant="ghost"
-            className="text-indigo-600 hover:text-indigo-800"
-          >
+          <Button asChild variant="ghost">
             <Link href="/">
               <FaArrowLeft className="mr-2" />
-              Back to Home
             </Link>
           </Button>
-          <h1 className="text-4xl font-extrabold text-indigo-900">
-            My Recipes
-          </h1>
+          <TypographyH2 className="border-b-0">My Recipes</TypographyH2>
           <Button
             onClick={fetchRecipes}
             variant="outline"
-            className="text-indigo-600 border-indigo-600 hover:bg-indigo-100"
+            className="border-primary"
           >
             Refresh Recipes
           </Button>
@@ -99,32 +95,28 @@ const Page = () => {
                     objectFit="cover"
                     className="transition-transform duration-300 hover:scale-105"
                   /> */}
-                  <div className="absolute top-2 right-2 bg-white rounded-full p-2">
-                    <FaUtensils
-                      className={
-                        recipe.food_type === "vegetarian"
-                          ? "text-green-500"
-                          : "text-red-500"
-                      }
-                    />
+                  <div className="absolute top-2 right-2 rounded-full p-2">
+                    {recipe.food_type === "vegetarian" ? (
+                      <Leaf className="text-green-600" />
+                    ) : (
+                      <FaUtensils className="text-red-600" />
+                    )}
                   </div>
                 </div>
                 <CardHeader>
-                  <CardTitle className="text-2xl font-bold text-indigo-900">
-                    {recipe.recipe_name}
-                  </CardTitle>
+                  <CardTitle>{recipe.recipe_name}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <TypographyP className="mb-4">
                     <span className="font-semibold">Type:</span>{" "}
                     {recipe.food_type === "vegetarian"
                       ? "Vegetarian"
                       : "Non-Vegetarian"}
-                  </p>
+                  </TypographyP>
                   <div className="mb-4">
-                    <h3 className="font-semibold text-lg text-indigo-900 mb-2">
+                    <TypographyP className="font-semibold mb-2">
                       Ingredients:
-                    </h3>
+                    </TypographyP>
                     <ul className="list-disc pl-5 space-y-1">
                       {recipe.ingredients.map((ing, idx) => (
                         <li key={idx} className="text-gray-700">
@@ -135,9 +127,9 @@ const Page = () => {
                     </ul>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg text-indigo-900 mb-2">
+                    <TypographyP className="font-semibold mb-2">
                       Procedure:
-                    </h3>
+                    </TypographyP>
                     <ol className="list-decimal pl-5 space-y-2">
                       {recipe.procedure.map((stepObj, idx) => (
                         <li key={idx} className="text-gray-700">
@@ -153,9 +145,7 @@ const Page = () => {
         ) : (
           <div className="text-center py-12">
             <FaUtensils className="mx-auto text-6xl text-indigo-300 mb-4" />
-            <p className="text-xl text-gray-600">
-              No recipes added yet. Start cooking!
-            </p>
+            <TypographyP>No recipes added yet. Start cooking!</TypographyP>
           </div>
         )}
       </div>

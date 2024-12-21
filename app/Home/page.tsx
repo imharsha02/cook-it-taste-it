@@ -191,14 +191,14 @@ const HomePage = () => {
                 <TabsList className="grid w-full grid-cols-2 mb-8 bg-gray-100 p-1 rounded-lg">
                   <TabsTrigger
                     value="vegetarian"
-                    className="text-lg py-3 rounded-md transition-all data-[state=active]:bg-gray-300 data-[state=active]:text-gray-900 data-[state=active]:shadow-md"
+                    className="text-lg py-3 rounded-md transition-all data-[state=active]:bg-green-600 data-[state=active]:text-gray-900 data-[state=active]:shadow-md"
                   >
                     <Leaf className="mr-2 h-5 w-5" />
                     Vegetarian
                   </TabsTrigger>
                   <TabsTrigger
                     value="nonVegetarian"
-                    className="text-lg py-3 rounded-md transition-all data-[state=active]:bg-gray-300 data-[state=active]:text-gray-900 data-[state=active]:shadow-md"
+                    className="text-lg py-3 rounded-md transition-all data-[state=active]:bg-red-600 data-[state=active]:text-gray-900 data-[state=active]:shadow-md"
                   >
                     <Utensils className="mr-2 h-5 w-5" />
                     Non-Vegetarian
