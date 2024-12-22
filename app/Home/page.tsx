@@ -6,9 +6,9 @@ import Header from "../components/Header";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { Utensils, Leaf, Trash2 } from "lucide-react";
-import { TypographyH3 } from "@/components/ui/Typography/TypographyH3";
+import { Utensils, Leaf, ChefHat } from "lucide-react";
 import { supabase } from "../lib/supabase";
+import RecipeCard from "../components/RecipeCard";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,12 +24,13 @@ interface Ingredient {
   name: string;
   quantity: string;
 }
+
 interface Recipe {
-  id: number;
-  food_type: string;
+  id: string;
+  food_type: "vegetarian" | "nonVegetarian";
   image: string;
   ingredients: Ingredient[];
-  procedure: string;
+  procedure: { step: string }[];
   recipe_name: string;
   user_id: string;
 }
@@ -41,7 +42,7 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [recipeToDelete, setRecipeToDelete] = useState<number | null>(null);
+  const [recipeToDelete, setRecipeToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     fetchRecipes();
@@ -72,7 +73,6 @@ const HomePage = () => {
     if (!recipeToDelete || !user) return;
 
     try {
-      // First, check if the recipe belongs to the current user
       const { data: recipeData, error: fetchError } = await supabase
         .from("recipes")
         .select("user_id")
@@ -81,12 +81,10 @@ const HomePage = () => {
 
       if (fetchError) throw fetchError;
 
-      // Verify ownership
       if (recipeData.user_id !== user.id) {
         throw new Error("Unauthorized: You can only delete your own recipes");
       }
 
-      // Delete the recipe
       const { error: deleteError } = await supabase
         .from("recipes")
         .delete()
@@ -110,62 +108,6 @@ const HomePage = () => {
   const handleTabChange = (value: string) => {
     setSelectedTab(value);
   };
-
-  const renderRecipeCard = (recipe: Recipe) => (
-    <Button asChild>
-      <Card key={recipe.id} className="overflow-hidden group relative">
-        {isSignedIn && user?.id === recipe.user_id && (
-          <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button
-              variant="destructive"
-              size="icon"
-              className="h-8 w-8 rounded-full"
-              onClick={(e) => {
-                e.stopPropagation();
-                setRecipeToDelete(recipe.id);
-                setDeleteConfirmOpen(true);
-              }}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            {recipe.food_type === "vegetarian" ? (
-              <Leaf className="h-4 w-4 text-green-600" />
-            ) : (
-              <Utensils className="h-4 w-4 text-red-600" />
-            )}
-            <TypographyH3 className="text-base">
-              {recipe.recipe_name}
-            </TypographyH3>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            <TypographyH3 className="mb-2">Ingredients:</TypographyH3>
-            <ul className="list-disc pl-5">
-              {recipe.ingredients.map((ingredient, index) => (
-                <li key={index}>
-                  {ingredient.quantity} <strong>{ingredient.name}</strong>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="mt-4">
-            <TypographyH3 className="mb-2">Procedure:</TypographyH3>
-            <ol className="list-decimal pl-5 space-y-1 text-sm text-muted-foreground">
-              {Array.isArray(recipe.procedure) &&
-                recipe.procedure.map(
-                  (stepObj: { step: string }, index: number) => (
-                    <li key={index}>{stepObj.step}</li>
-                  )
-                )}
-            </ol>
-          </div>
-        </CardContent>
-      </Card>
-    </Button>
-  );
 
   const getFilteredRecipes = (type: string | null) => {
     if (!type) {
@@ -203,42 +145,52 @@ const HomePage = () => {
 
     return (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredRecipes.map(renderRecipeCard)}
+        {filteredRecipes.map((recipe) => (
+          <RecipeCard
+            key={recipe.id}
+            recipe={recipe}
+            isSignedIn={!!isSignedIn} // Convert to boolean explicitly
+            userId={user?.id || null}
+            onDeleteClick={(recipeId) => {
+              setRecipeToDelete(recipeId); // No need for Number() conversion
+              setDeleteConfirmOpen(true);
+            }}
+          />
+        ))}
       </div>
     );
   };
 
   return (
     <>
-      <style jsx global>{`
-        body {
-          overflow-y: scroll;
-        }
-      `}</style>
-
-      <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
+      <div className="min-h-screen bg-gradient-to-b from-background via-background/50 to-background/80">
         <div className="container mx-auto max-w-7xl px-4 py-8">
-          <div className="flex items-center justify-between mb-12">
+          <div className="relative flex items-center justify-between mb-16">
+            <div className="absolute inset-0 -z-10 h-48 bg-gradient-to-b from-primary/5 to-transparent" />
             <div className="flex-1 flex justify-center items-center relative w-full">
-              <Header />
+              <div className="flex items-center gap-2 text-3xl font-bold tracking-tight">
+                <ChefHat className="h-8 w-8 text-primary" />
+                <Header />
+              </div>
               <SignedIn>
                 <div className="absolute right-0 flex items-center gap-4">
                   <UserButton />
-                  <Button className="hover:bg-primary/90" size="lg" asChild>
-                    <Link href="/add-recipe">Add Recipe</Link>
-                  </Button>
-                  <Button className="hover:bg-primary/90" size="lg" asChild>
-                    <Link href="/my-recipes">My Recipes</Link>
-                  </Button>
+                  <div className="flex gap-3">
+                    <Button className="shadow-lg" size="lg" asChild>
+                      <Link href="/add-recipe">Add Recipe</Link>
+                    </Button>
+                    <Button size="lg" asChild>
+                      <Link href="/my-recipes">My Recipes</Link>
+                    </Button>
+                  </div>
                 </div>
               </SignedIn>
               <SignedOut>
-                <div className="absolute right-0 space-x-4">
-                  <Button>
+                <div className="absolute right-0 flex gap-3">
+                  <Button variant="secondary" size="lg" asChild>
                     <Link href="/sign-up">Sign up</Link>
                   </Button>
-
-                  <Button>
+                  <Button size="lg" asChild>
                     <Link href="/sign-in">Sign in</Link>
                   </Button>
                 </div>
@@ -246,31 +198,31 @@ const HomePage = () => {
             </div>
           </div>
 
-          <Card className="bg-card/50 backdrop-blur-sm shadow-lg">
-            <CardContent className="p-6">
+          <Card className="border-none bg-card/50 backdrop-blur-sm shadow-xl">
+            <CardContent className="p-8">
               <Tabs
                 value={selectedTab || undefined}
                 onValueChange={handleTabChange}
                 className="w-full mx-auto"
               >
-                <TabsList className="grid w-full grid-cols-2 mb-8 bg-gray-100 p-1 rounded-lg">
+                <TabsList className="w-full h-14 justify-evenly p-1">
                   <TabsTrigger
                     value="vegetarian"
-                    className="text-lg py-3 rounded-md transition-all data-[state=active]:bg-green-600 data-[state=active]:text-gray-900 data-[state=active]:shadow-md"
+                    className="h-full px-4 transition-all data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-md"
                   >
                     <Leaf className="mr-2 h-5 w-5" />
                     Vegetarian
                   </TabsTrigger>
                   <TabsTrigger
                     value="nonVegetarian"
-                    className="text-lg py-3 rounded-md transition-all data-[state=active]:bg-red-600 data-[state=active]:text-gray-900 data-[state=active]:shadow-md"
+                    className="h-full px-4 transition-all data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-md"
                   >
                     <Utensils className="mr-2 h-5 w-5" />
                     Non-Vegetarian
                   </TabsTrigger>
                 </TabsList>
 
-                <div className="mt-4">
+                <div className="mt-8">
                   {renderRecipeGrid(getFilteredRecipes(selectedTab))}
                 </div>
               </Tabs>
