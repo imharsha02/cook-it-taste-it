@@ -112,57 +112,59 @@ const HomePage = () => {
   };
 
   const renderRecipeCard = (recipe: Recipe) => (
-    <Card key={recipe.id} className="overflow-hidden group relative">
-      {isSignedIn && user?.id === recipe.user_id && (
-        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button
-            variant="destructive"
-            size="icon"
-            className="h-8 w-8 rounded-full"
-            onClick={(e) => {
-              e.stopPropagation();
-              setRecipeToDelete(recipe.id);
-              setDeleteConfirmOpen(true);
-            }}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-      <CardContent className="p-4">
-        <div className="flex items-center gap-2 mb-2">
-          {recipe.food_type === "vegetarian" ? (
-            <Leaf className="h-4 w-4 text-green-600" />
-          ) : (
-            <Utensils className="h-4 w-4 text-red-600" />
-          )}
-          <TypographyH3 className="text-base">
-            {recipe.recipe_name}
-          </TypographyH3>
-        </div>
-        <div className="text-sm text-muted-foreground">
-          <TypographyH3 className="mb-2">Ingredients:</TypographyH3>
-          <ul className="list-disc pl-5">
-            {recipe.ingredients.map((ingredient, index) => (
-              <li key={index}>
-                {ingredient.quantity} <strong>{ingredient.name}</strong>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="mt-4">
-          <TypographyH3 className="mb-2">Procedure:</TypographyH3>
-          <ol className="list-decimal pl-5 space-y-1 text-sm text-muted-foreground">
-            {Array.isArray(recipe.procedure) &&
-              recipe.procedure.map(
-                (stepObj: { step: string }, index: number) => (
-                  <li key={index}>{stepObj.step}</li>
-                )
-              )}
-          </ol>
-        </div>
-      </CardContent>
-    </Card>
+    <Button asChild>
+      <Card key={recipe.id} className="overflow-hidden group relative">
+        {isSignedIn && user?.id === recipe.user_id && (
+          <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              variant="destructive"
+              size="icon"
+              className="h-8 w-8 rounded-full"
+              onClick={(e) => {
+                e.stopPropagation();
+                setRecipeToDelete(recipe.id);
+                setDeleteConfirmOpen(true);
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 mb-2">
+            {recipe.food_type === "vegetarian" ? (
+              <Leaf className="h-4 w-4 text-green-600" />
+            ) : (
+              <Utensils className="h-4 w-4 text-red-600" />
+            )}
+            <TypographyH3 className="text-base">
+              {recipe.recipe_name}
+            </TypographyH3>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            <TypographyH3 className="mb-2">Ingredients:</TypographyH3>
+            <ul className="list-disc pl-5">
+              {recipe.ingredients.map((ingredient, index) => (
+                <li key={index}>
+                  {ingredient.quantity} <strong>{ingredient.name}</strong>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="mt-4">
+            <TypographyH3 className="mb-2">Procedure:</TypographyH3>
+            <ol className="list-decimal pl-5 space-y-1 text-sm text-muted-foreground">
+              {Array.isArray(recipe.procedure) &&
+                recipe.procedure.map(
+                  (stepObj: { step: string }, index: number) => (
+                    <li key={index}>{stepObj.step}</li>
+                  )
+                )}
+            </ol>
+          </div>
+        </CardContent>
+      </Card>
+    </Button>
   );
 
   const getFilteredRecipes = (type: string | null) => {
@@ -302,8 +304,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-
-
-
-
-
