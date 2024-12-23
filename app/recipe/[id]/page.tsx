@@ -1,4 +1,3 @@
-// app/recipe/[id]/page.tsx
 import { supabase } from "@/app/lib/supabase";
 import { Leaf, Utensils, ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -23,15 +22,17 @@ interface Recipe {
   user_id: string;
 }
 
-export default async function RecipePage({
-  params: { id },
-}: {
-  params: { id: string };
-}) {
+interface RecipePageParams {
+  params: {
+    id: string;
+  };
+}
+
+export default async function RecipePage({ params }: RecipePageParams) {
   const { data: recipe, error } = await supabase
     .from("recipes")
     .select("*")
-    .eq("id", id)
+    .eq("id", params.id)
     .single();
 
   if (error || !recipe) {
