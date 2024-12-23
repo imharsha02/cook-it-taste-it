@@ -23,17 +23,15 @@ interface Recipe {
   user_id: string;
 }
 
-interface RecipePageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default async function RecipePage({ params }: RecipePageProps) {
+export default async function RecipePage({
+  params: { id },
+}: {
+  params: { id: string };
+}) {
   const { data: recipe, error } = await supabase
     .from("recipes")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (error || !recipe) {
