@@ -7,7 +7,7 @@ export default function Page() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <TypographyH2 className="border-none text-center">
-            Sign in to <span className="text-red-500">Cook it Taste it</span>
+            Sign in to <span className="text-red-500">ChefShare</span>
           </TypographyH2>
         </div>
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">

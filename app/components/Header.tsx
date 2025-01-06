@@ -3,7 +3,7 @@ const Header = () => {
   return (
     <div>
       <TypographyH1 className="text-center py-3 w-max mx-auto border-b">
-        Cook it Share it
+        ChefShare
       </TypographyH1>
     </div>
   );

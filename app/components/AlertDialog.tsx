@@ -27,7 +27,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
-            Welcome to Cook it Taste it!
+            Welcome to ChefShare!
           </DialogTitle>
         </DialogHeader>
         <TypographyP className="text-muted-foreground">
